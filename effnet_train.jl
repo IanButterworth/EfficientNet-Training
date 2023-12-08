@@ -13,7 +13,7 @@ function loss_and_accuracy(data_loader, model, device)
     ls = 0.0f0
     num = 0
     for (x, y) in data_loader
-        x = x |> device; y = y |> device
+        x, y = x |> device, y |> device
         ŷ = model(x)
         ls += logitcrossentropy(ŷ, y, agg=sum)
         acc += sum(onecold(ŷ) .== onecold(y))
@@ -24,9 +24,8 @@ end
 
 function _train(;epochs = 45, batchsize = 1000, device = gpu)
     @info "loading CIFAR-10 dataset"
-    train_dataset = CIFAR10(split=:train)
+    train_dataset, test_dataset = CIFAR10(split=:train), CIFAR10(split=:test)
     train_x, train_y = train_dataset[:]
-    test_dataset = CIFAR10(split=:test)
     test_x, test_y = test_dataset[:]
     @assert train_dataset.metadata["class_names"] == test_dataset.metadata["class_names"]
     labels = train_dataset.metadata["class_names"]
@@ -53,7 +52,7 @@ function _train(;epochs = 45, batchsize = 1000, device = gpu)
     @info "starting training"
     for epoch in 1:epochs
         @showprogress "training epoch $epoch/$epochs" for (x, y) in train_loader
-            x = x |> device; y = y |> device
+            x, y = x |> device, y |> device
             gs, _ = gradient(model, x) do m, _x
                 logitcrossentropy(m(_x), y)
             end
