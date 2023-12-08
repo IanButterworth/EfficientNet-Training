@@ -46,8 +46,8 @@ function _train(;epochs = 45, batchsize = 1000, device = gpu)
     opt = Optimisers.Adam()
     state = Optimisers.setup(opt, model)
 
-    train_loss_hist, train_acc_hist = Float64[]
-    test_loss_hist, test_acc_hist = Float64[]
+    train_loss_hist, train_acc_hist = Float64[], Float64[]
+    test_loss_hist, test_acc_hist = Float64[], Float64[]
 
     @info "starting training"
     for epoch in 1:epochs
@@ -82,6 +82,7 @@ function train(args...;kwargs...)
     try
         _train(args...; kwargs...)
     catch ex
+        # rethrow()
         println()
         @error sprint(showerror, ex)
         GC.gc()
