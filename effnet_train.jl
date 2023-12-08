@@ -46,8 +46,8 @@ function _train(;epochs = 45, batchsize = 1000, device = gpu)
     opt = Optimisers.Adam()
     state = Optimisers.setup(opt, model)
 
-    train_acc_hist = Float64[]
-    test_acc_hist = Float64[]
+    train_loss_hist, train_acc_hist = Float64[]
+    test_loss_hist, test_acc_hist = Float64[]
 
     @info "starting training"
     for epoch in 1:epochs
@@ -60,10 +60,13 @@ function _train(;epochs = 45, batchsize = 1000, device = gpu)
 
         @info "epoch $epoch complete. Testing..."
         train_loss, train_acc = loss_and_accuracy(train_loader, model, device)
+        push!(train_loss_hist, train_loss); push!(train_acc_hist, train_acc);
         test_loss, test_acc = loss_and_accuracy(test_loader, model, device)
-        push!(train_acc_hist, train_acc); push!(test_acc_hist, test_acc);
+        push!(test_loss_hist, test_loss); push!(test_acc_hist, test_acc);
         @info map(x->round(x, digits=3), (; train_loss, train_acc, test_loss, test_acc))
-        plt = lineplot(1:epoch, train_acc_hist, name = "train_acc", xlabel="epoch", ylabel="accuracy")
+        plt = lineplot(1:epoch, train_loss_hist, name = "train_loss", xlabel="epoch")
+        lineplot!(plt, 1:epoch, train_acc_hist, name = "train_acc")
+        lineplot!(plt, 1:epoch, test_loss_hist, name = "test_loss")
         lineplot!(plt, 1:epoch, test_acc_hist, name = "test_acc")
         display(plt)
         if device === gpu
