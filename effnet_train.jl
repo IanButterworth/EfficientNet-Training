@@ -88,7 +88,7 @@ function _train(;epochs = 45, batchsize = 1000, device = gpu, limit=nothing, gpu
         end
         if device === gpu && gpu_gc
             CUDA.memory_status()
-            GC.gc(true) # GPU will OOM without this
+            GC.gc() # GPU will OOM without this
             CUDA.memory_status()
         end
     end
