@@ -27,7 +27,7 @@ function loss_and_accuracy(data_loader, model, device; limit = nothing)
     return ls / num, acc / num
 end
 
-function _train(;epochs = 45, batchsize = 1000, device = gpu, limit=nothing, gpu_gc=true)
+function _train(;epochs = 45, batchsize = 1000, device = gpu, limit=nothing, gpu_gc=true, gpu_stats=false)
     @info "loading CIFAR-10 dataset"
     train_dataset, test_dataset = CIFAR10(split=:train), CIFAR10(split=:test)
     train_x, train_y = train_dataset[:]
@@ -63,6 +63,8 @@ function _train(;epochs = 45, batchsize = 1000, device = gpu, limit=nothing, gpu
                 logitcrossentropy(m(_x), y)
             end
             state, model = Optimisers.update(state, model, gs)
+
+            device === gpu && gpu_stats && CUDA.memory_status()
             if limit !== nothing
                 i == limit && break
                 i += 1
